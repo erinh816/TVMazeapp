@@ -2,6 +2,7 @@
 
 const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
+const $episodesList = $('#episodesList');
 const $searchForm = $("#searchForm");
 const apiUrl = 'http://api.tvmaze.com/search/shows?';
 const defaultImage = 'https://tinyurl.com/tv-missing';
@@ -28,7 +29,7 @@ async function getShowsByTerm(term) {
     if (image === null) {
       image = {
         original: defaultImage
-      }
+      };
     }
     showArray.push({ id, name, summary, image });
   }
@@ -97,15 +98,38 @@ async function getEpisodesOfShow(showId) {
   const response = await fetch(`http://api.tvmaze.com/shows/${showId}/episodes`);
   const episodeData = await response.json();
 
-  let episodeArray = episodeData.map(({id, name ,season, number}) => ({id,name, season, number}))
+  let episodeArray = episodeData.map(({ id, name, season, number }) => ({ id, name, season, number }));
   console.log(episodeArray);
+
+  displayEpisodes(episodeArray);
+
 }
 
-function displayEpisodes(episodes) { }
+function displayEpisodes(episodes) {
+  $episodesList.empty();
+  $episodesArea.show();
+
+  for (const episode of episodes) {
+
+    const $episode = $(`
+    <li>${episode.name},Season:${episode.season}, Episode:${episode.number}</li>
+
+    `);
+
+    $episodesList.append($episode);
+  }
+
+}
 
 // add other functions that will be useful / match our structure & design
 
 
-$('#showsList').on('click', '.episode', function(){
-  getEpisodesOfShow(139);
-})
+$('#showsList').on('click', '.Show', function () {
+
+  const episodeId = (this.dataset.showId);
+
+});
+
+// const div = document.querySelector('.Show');
+
+// console.log(div.dataset.showId);
