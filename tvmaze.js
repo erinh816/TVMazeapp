@@ -3,6 +3,8 @@
 const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
+const apiUrl = 'http://api.tvmaze.com/search/shows?';
+const defaultImage = 'https://tinyurl.com/tv-missing';
 
 
 
@@ -16,18 +18,19 @@ const $searchForm = $("#searchForm");
 async function getShowsByTerm(term) {
   let showArray = [];
 
-  const params = new URLSearchParams({q:term });
-  const response = await fetch(`http://api.tvmaze.com/search/shows?${params}`)
+  const params = new URLSearchParams({ q: term });
+  const response = await fetch(`${apiUrl}${params}`);
   const showData = await response.json();
 
-  for(let item of showData){
-    let {id, name, summary, image} = item.show //Ask about why image.original does not work in destructuring
+  for (let item of showData) {//TODO: you can accomplish this logic using a map
+    let { id, name, summary, image } = item.show;
+
     if (image === null) {
       image = {
-        original: 'https://tinyurl.com/tv-missing'
-      };
+        original: defaultImage
+      }
     }
-    showArray.push({id, name, summary, image})
+    showArray.push({ id, name, summary, image });
   }
   return showArray;
 }
@@ -49,12 +52,12 @@ function displayShows(shows) {
          <div class="media">
            <img
               src=${srcImage}
-              alt="Bletchly Circle San Francisco"
+              alt="${show.name}"
               class="w-25 me-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
              <div><small>${show.summary}</small></div>
-             <button class="btn btn-outline-light btn-sm Show-getEpisodes">
+             <button class="btn btn-outline-light btn-sm Show-getEpisodes episode">
                Episodes
              </button>
            </div>
@@ -89,11 +92,20 @@ $searchForm.on("submit", async function handleSearchForm(evt) {
 /** Given a show ID, get from API and return (promise) array of episodes:
  *      { id, name, season, number }
  */
-
-// async function getEpisodesOfShow(id) { }
-
 /** Write a clear docstring for this function... */
+async function getEpisodesOfShow(showId) {
+  const response = await fetch(`http://api.tvmaze.com/shows/${showId}/episodes`);
+  const episodeData = await response.json();
 
-// function displayEpisodes(episodes) { }
+  let episodeArray = episodeData.map(({id, name ,season, number}) => ({id,name, season, number}))
+  console.log(episodeArray);
+}
+
+function displayEpisodes(episodes) { }
 
 // add other functions that will be useful / match our structure & design
+
+
+$('#showsList').on('click', '.episode', function(){
+  getEpisodesOfShow(139);
+})
