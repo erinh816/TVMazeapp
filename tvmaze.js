@@ -91,20 +91,23 @@ $searchForm.on("submit", async function handleSearchForm(evt) {
 
 
 /** Given a show ID, get from API and return (promise) array of episodes:
- *      { id, name, season, number }
+ * { id, name, season, number }
  */
-/** Write a clear docstring for this function... */
 async function getEpisodesOfShow(showId) {
   const response = await fetch(`http://api.tvmaze.com/shows/${showId}/episodes`);
   const episodeData = await response.json();
 
-  let episodeArray = episodeData.map(({ id, name, season, number }) => ({ id, name, season, number }));
-  console.log(episodeArray);
+  let episodeArray = episodeData.map(({ id, name, season, number }) =>
+    ({ id, name, season, number }));
 
-  displayEpisodes(episodeArray);
+  return episodeArray;//TODO: better var name is episodes
 
 }
 
+/**
+ * Given array of episodes
+ * append each episode information to DOM
+ */
 function displayEpisodes(episodes) {
   $episodesList.empty();
   $episodesArea.show();
@@ -112,8 +115,7 @@ function displayEpisodes(episodes) {
   for (const episode of episodes) {
 
     const $episode = $(`
-    <li>${episode.name},Season:${episode.season}, Episode:${episode.number}</li>
-
+    <li>${episode.name}, Season: ${episode.season}, Episode: ${episode.number}</li> //TODO:Format to resemble actual li in html form
     `);
 
     $episodesList.append($episode);
@@ -121,15 +123,22 @@ function displayEpisodes(episodes) {
 
 }
 
-// add other functions that will be useful / match our structure & design
+/**
+ * Handles episode search using the show ID
+ * displays resulting episode information in DOM
+ */
+async function getEpisodesAndDisplay(showID) {
+  const episodes = await getEpisodesOfShow(showID);
+  displayEpisodes(episodes);
+}
 
-
-$('#showsList').on('click', '.Show', function () {
-
-  const episodeId = (this.dataset.showId);
-
+/**
+ * Handles click of episodes button,
+ * get the showID from accessing show ID data attribute in the DOM,
+ * then passes ID to conductor function to display results
+ */
+$('#showsList').on('click', '.Show', function handleEpisodesButton() {
+  const showId = (this.dataset.showId);
+  getEpisodesAndDisplay(showId);
 });
 
-// const div = document.querySelector('.Show');
-
-// console.log(div.dataset.showId);
